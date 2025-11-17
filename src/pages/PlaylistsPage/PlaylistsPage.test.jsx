@@ -81,8 +81,9 @@ describe('PlaylistsPage', () => {
         const heading = await screen.findByRole('heading', { level: 1, name: 'Your Playlists' });
         expect(heading).toBeInTheDocument();
 
-        // should render heading of level 2 showing total playlist count
-        const countHeading = await screen.findByRole('heading', { level: 2, name: `${playlistsData.total} Playlists` });
+    // should render heading of level 2 showing total playlist count
+    const expectedText = `${playlistsData.total > limit ? limit : playlistsData.total} of ${playlistsData.total} Playlists`;
+    const countHeading = await screen.findByRole('heading', { level: 2, name: expectedText });
         expect(countHeading).toBeInTheDocument();
 
         // verify each playlist item rendered, don't check details here as covered in PlaylistItem tests
@@ -151,7 +152,8 @@ describe('PlaylistsPage', () => {
         expect(heading1).toHaveClass('playlists-title', 'page-title');
 
     // should have heading level 2 with appropriate class name
-    const heading2 = screen.getByRole('heading', { level: 2, name: `${playlistsData.total} Playlists` });
+    const expectedHeadingText = `${playlistsData.total > limit ? limit : playlistsData.total} of ${playlistsData.total} Playlists`;
+    const heading2 = screen.getByRole('heading', { level: 2, name: expectedHeadingText });
         expect(heading2).toHaveClass('playlists-count');
 
         // should have ordered list with appropriate class name
@@ -177,8 +179,8 @@ describe('PlaylistsPage', () => {
         // wait for loading to finish
         await waitForLoadingToFinish();
 
-        // Expect the heading to show "3 Playlists"
-        const countHeading = await screen.findByRole('heading', { level: 2, name: '3 Playlists' });
+    // Expect the heading to show "3 of 3 Playlists"
+    const countHeading = await screen.findByRole('heading', { level: 2, name: '3 of 3 Playlists' });
         expect(countHeading).toBeInTheDocument();
 
         // Sanity: ensure it's not showing the limit (e.g. 10) instead
