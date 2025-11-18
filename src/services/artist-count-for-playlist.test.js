@@ -62,4 +62,67 @@ describe("artistCountForPlaylist", () => {
 
     consoleSpy.mockRestore();
   });
+
+  test("returns undefined and logs error when fetchPlaylistById resolves with error field", async () => {
+    fetchPlaylistById.mockResolvedValue({ data: null, error: 'Invalid token' });
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    const result = await artistCountForPlaylist("t", "p");
+    expect(result).toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  test("returns empty object when tracks or items are missing or not an array", async () => {
+    // case: data is null
+    fetchPlaylistById.mockResolvedValueOnce({ data: null, error: null });
+    let result = await artistCountForPlaylist("t", "p");
+    expect(result).toEqual({});
+
+    // case: tracks missing
+    fetchPlaylistById.mockResolvedValueOnce({ data: {}, error: null });
+    result = await artistCountForPlaylist("t", "p");
+    expect(result).toEqual({});
+
+    // case: items not an array
+    fetchPlaylistById.mockResolvedValueOnce({ data: { tracks: { items: null } }, error: null });
+    result = await artistCountForPlaylist("t", "p");
+    expect(result).toEqual({});
+  });
+
+  test("skips playlist items without a track and handles non-array artists", async () => {
+    fetchPlaylistById.mockResolvedValue({
+      data: {
+        tracks: {
+          items: [
+            {}, // missing track -> should be skipped
+            { track: null }, // null track -> skipped
+            { track: { artists: null } }, // artists not array -> treated as []
+            { track: { artists: [{ name: 'Artist X' }] } },
+          ],
+        },
+      },
+      error: null,
+    });
+
+    const result = await artistCountForPlaylist("t", "p");
+    expect(result).toEqual({ 'Artist X': 1 });
+  });
+
+  test("uses 'Unknown Artist' when artist object has no name or id", async () => {
+    fetchPlaylistById.mockResolvedValue({
+      data: {
+        tracks: {
+          items: [
+            { track: { artists: [ {}, { id: 'artist-id-1' } ] } },
+          ],
+        },
+      },
+      error: null,
+    });
+
+    const result = await artistCountForPlaylist("t", "p");
+    expect(result).toEqual({ 'Unknown Artist': 1, 'artist-id-1': 1 });
+  });
 });
