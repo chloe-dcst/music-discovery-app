@@ -38,6 +38,6 @@ describe('PlayListItem component', () => {
         // link navigates to the playlist detail route using id
         const link = screen.getByRole('link');
         expect(link).toBeInTheDocument();
-        expect(link.getAttribute('href')).toBe(`/playlist/${playlist.id}`);
+        expect(link).toHaveAttribute('href', `/playlist/${playlist.id}`);
     });
 });
