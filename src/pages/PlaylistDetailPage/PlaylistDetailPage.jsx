@@ -116,8 +116,10 @@ export default function PlaylistDetailPage() {
           {result.data?.tracks?.items && result.data.tracks.items.length > 0 ? (
             <ul className="playlist-list" aria-label="Playlist tracks">
               {result.data.tracks.items.map((item, idx) => {
-                const track = item?.track ?? item;
-                if (!track) return null;
+                // Support both shapes: { track: {...} } or direct track object.
+                // If item.track is null/undefined, skip the entry.
+                const track = item && item.track ? item.track : item;
+                if (!track || !track.id) return null;
                 return <TrackItem key={track.id || `${idx}`} track={track} />;
               })}
             </ul>
