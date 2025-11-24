@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { useRequireToken } from '../../hooks/useRequireToken.js';
 import { fetchPlaylistById } from '../../api/spotify-playlists.js';
 import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
+import './PlaylistDetailPage.css'
 
-export default function PlaylistPage() {
+export default function PlaylistDetailPage() {
   const { id } = useParams();
   const { token } = useRequireToken();
   const navigate = useNavigate();
@@ -63,8 +64,32 @@ export default function PlaylistPage() {
   }, [token, id, navigate]);
 
   return (
-    <div>
-      <div>Playlist Page — id: {id}</div>
+    <div className="playlist-container">
+      <div className="playlist-id">Playlist Page — id: {id}</div>
+
+      {result?.data && (
+        <header className="playlist-header">
+          <div className="playlist-header-image">
+            <img
+              src={result.data.images?.[0]?.url}
+              alt={result.data.name || 'cover'}
+              className="playlist-cover"
+            />
+          </div>
+
+          <div className="playlist-header-text-with-link">
+            <div className="playlist-header-text">
+              <h1 className="playlist-title">{result.data.name}</h1>
+              {result.data.description ? (
+                <p className="playlist-subtitle" dangerouslySetInnerHTML={{ __html: result.data.description }} />
+              ) : null}
+            </div>
+
+            <a className="playlist-spotify-link" href={result.data.external_urls?.spotify} target="_blank" rel="noopener noreferrer">Open in Spotify</a>
+          </div>
+        </header>
+      )}
+
       {result && (
         <pre style={{ whiteSpace: 'pre-wrap', maxHeight: 400, overflow: 'auto' }}>
           {JSON.stringify(result, null, 2)}
