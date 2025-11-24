@@ -66,8 +66,7 @@ export default function PlaylistDetailPage() {
 
   return (
     <div className="playlist-container">
-      <div className="playlist-id">Playlist Page — id: {id}</div>
-
+    
       {result?.data && (
         <header className="playlist-header">
           <div className="playlist-header-image">
