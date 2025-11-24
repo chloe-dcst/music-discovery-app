@@ -4,6 +4,7 @@ import { useRequireToken } from '../../hooks/useRequireToken.js';
 import { fetchPlaylistById } from '../../api/spotify-playlists.js';
 import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
 import './PlaylistDetailPage.css'
+import TrackItem from '../../components/TrackItem/TrackItem.jsx';
 
 export default function PlaylistDetailPage() {
   const { id } = useParams();
@@ -91,9 +92,23 @@ export default function PlaylistDetailPage() {
       )}
 
       {result && (
-        <pre style={{ whiteSpace: 'pre-wrap', maxHeight: 400, overflow: 'auto' }}>
-          {JSON.stringify(result, null, 2)}
-        </pre>
+        <section>
+          {result.error && (
+            <div className="playlist-error">Error: {String(result.error)}</div>
+          )}
+
+          {result.data?.tracks?.items && result.data.tracks.items.length > 0 ? (
+            <ul className="playlist-list" aria-label="Playlist tracks">
+              {result.data.tracks.items.map((item, idx) => {
+                const track = item?.track ?? item;
+                if (!track) return null;
+                return <TrackItem key={track.id || `${idx}`} track={track} />;
+              })}
+            </ul>
+          ) : (
+            !result.error && <div className="playlist-loading">No tracks found in this playlist.</div>
+          )}
+        </section>
       )}
     </div>
   );
