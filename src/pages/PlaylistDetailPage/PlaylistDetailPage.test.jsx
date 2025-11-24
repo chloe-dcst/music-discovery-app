@@ -1,10 +1,9 @@
-// src/pages/PlaylistsPage.test.jsx
-
+// src/pages/PlaylistDetailPage.test.jsx
 import { describe, expect, test } from '@jest/globals';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import PlaylistPage from './PlaylistPage.jsx';
+import PlaylistPage from './PlaylistDetailPage.jsx';
 import * as spotifyApi from '../../api/spotify-playlists.js';
 import { beforeEach, afterEach, jest } from '@jest/globals';
 import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
@@ -189,5 +188,36 @@ describe('PlaylistPage', () => {
        // should have ordered list with appropriate class name
         const list = screen.getByRole('list');
         expect(list).toHaveClass('playlist-list');
+    });
+
+    test('normalizes spotify URI id and calls API with cleaned id', async () => {
+        // Spy on fetch and make it succeed
+        const spy = jest.spyOn(spotifyApi, 'fetchPlaylistById').mockResolvedValue({ data: playlistData, error: null });
+
+        // Use encoded param so router decodes it back to the URI string
+        const rawId = `spotify:playlist:${playlistData.id}`;
+        render(
+            <MemoryRouter initialEntries={[`/playlist/${encodeURIComponent(rawId)}`]}>
+                <Routes>
+                    <Route path="/playlist/:id" element={<PlaylistPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        // wait for effect
+        await waitFor(() => expect(spy).toHaveBeenCalled());
+        expect(spy).toHaveBeenCalledWith(tokenValue, playlistData.id);
+    });
+
+    test('removes stored token when API reports expired token', async () => {
+        // Make API respond with expired token
+        jest.spyOn(spotifyApi, 'fetchPlaylistById').mockResolvedValue({ data: null, error: 'The access token expired' });
+        const removeSpy = jest.spyOn(window.localStorage.__proto__, 'removeItem');
+
+        renderPlaylistPage('playlist1');
+
+        // wait for navigation to login (existing test checks presence); we also assert removeItem called
+        await screen.findByText('Login Page');
+        expect(removeSpy).toHaveBeenCalledWith(KEY_ACCESS_TOKEN);
     });
 });

@@ -3,6 +3,7 @@
 import { describe, expect, test } from '@jest/globals'
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import PlayListItem from './PlayListItem';
 
 describe('PlayListItem component', () => {
@@ -17,7 +18,11 @@ describe('PlayListItem component', () => {
             external_urls: { spotify: 'https://open.spotify.com/playlist/playlist1' }
         };
         // Act
-        render(<PlayListItem playlist={playlist} />);
+        render(
+            <MemoryRouter>
+                <PlayListItem playlist={playlist} />
+            </MemoryRouter>
+        );
 
         // Assert
         // items are rendered correctly
@@ -30,7 +35,9 @@ describe('PlayListItem component', () => {
         expect(screen.getByText(`By ${playlist.owner.display_name}`)).toBeInTheDocument();
         // track count is rendered correctly
         expect(screen.getByText(`${playlist.tracks.total} tracks`)).toBeInTheDocument();
-        // link is rendered correctly
-        expect(screen.getByRole('link')).toHaveAttribute('href', playlist.external_urls.spotify);
+        // link navigates to the playlist detail route using id
+        const link = screen.getByRole('link');
+        expect(link).toBeInTheDocument();
+        expect(link).toHaveAttribute('href', `/playlist/${playlist.id}`);
     });
 });
