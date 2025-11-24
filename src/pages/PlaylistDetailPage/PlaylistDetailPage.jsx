@@ -5,6 +5,7 @@ import { fetchPlaylistById } from '../../api/spotify-playlists.js';
 import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
 import './PlaylistDetailPage.css'
 import TrackItem from '../../components/TrackItem/TrackItem.jsx';
+import { buildTitle } from '../../constants/appMeta.js';
 
 export default function PlaylistDetailPage() {
   const { id } = useParams();
@@ -64,24 +65,40 @@ export default function PlaylistDetailPage() {
     return () => { mounted = false; };
   }, [token, id, navigate]);
 
+  // update document title when playlist data is available
+  useEffect(() => {
+    if (result?.data?.name) {
+      document.title = buildTitle('Playlist');
+    }
+  }, [result]);
+
+  // ensure page title is set as early as possible for tests
+  useEffect(() => {
+    document.title = buildTitle('Playlist');
+  }, []);
+
   return (
-    <div className="playlist-container">
-    
+    <div className="playlist-container page-container" role="region" aria-label={result?.data?.name || 'Playlist'}>
+
+      {result === null && (
+        <div role="status">Loading playlist... <span data-testid="loading-indicator" /></div>
+      )}
+
       {result?.data && (
         <header className="playlist-header">
           <div className="playlist-header-image">
             <img
               src={result.data.images?.[0]?.url}
-              alt={result.data.name || 'cover'}
+              alt={`Cover of ${result.data.name}`}
               className="playlist-cover"
             />
           </div>
 
           <div className="playlist-header-text-with-link">
             <div className="playlist-header-text">
-              <h1 className="playlist-title">{result.data.name}</h1>
+              <h1 className="playlist-title page-title">{result.data.name}</h1>
               {result.data.description ? (
-                <p className="playlist-subtitle" dangerouslySetInnerHTML={{ __html: result.data.description }} />
+                <h2 className="playlist-subtitle page-subtitle" dangerouslySetInnerHTML={{ __html: result.data.description }} />
               ) : null}
             </div>
 
@@ -93,7 +110,7 @@ export default function PlaylistDetailPage() {
       {result && (
         <section>
           {result.error && (
-            <div className="playlist-error">Error: {String(result.error)}</div>
+            <div role="alert" className="playlist-error">Error: {String(result.error)}</div>
           )}
 
           {result.data?.tracks?.items && result.data.tracks.items.length > 0 ? (
