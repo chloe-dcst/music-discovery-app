@@ -7,7 +7,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import DashboardPage from './DashboardPage.jsx';
 import * as spotifyApi from '../../api/spotify-me.js';
 import { beforeEach, afterEach, jest } from '@jest/globals';
-import { KEY_ACCESS_TOKEN } from '../../constants/storageKeys.js';
+import * as useRequireTokenHook from '../../hooks/useRequireToken.js';
 import { buildTitle } from '../../constants/appMeta.js';
 
 // Mock top artist and track data
@@ -43,7 +43,8 @@ describe('DashboardPage', () => {
     // Setup mocks before each test
     beforeEach(() => {
         // Mock localStorage token access
-        jest.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation((key) => key === KEY_ACCESS_TOKEN ? tokenValue : null);
+        // Default mock: return a valid token via the hook
+        jest.spyOn(useRequireTokenHook, 'useRequireToken').mockReturnValue({ token: tokenValue, checking: false });
 
         // Default mock: successful top artist and track fetch
         jest.spyOn(spotifyApi, 'fetchUserTopArtists').mockResolvedValue({ data: topArtistData, error: null });
@@ -134,5 +135,44 @@ describe('DashboardPage', () => {
         // When the API returns a token-expired error the component sets the `error` state
         const alert = await screen.findByRole('alert');
         expect(alert).toHaveTextContent('The access token expired');
+    });
+
+    test('shows checking status while auth is being verified', () => {
+        // Make the hook report checking state
+        jest.spyOn(useRequireTokenHook, 'useRequireToken').mockReturnValue({ token: null, checking: true });
+
+        renderDashboardPage();
+
+        expect(screen.getByRole('status')).toHaveTextContent(/Checking authentication/i);
+    });
+
+    test('does not call API when no token available', () => {
+        // Hook reports no token and not checking
+        jest.spyOn(useRequireTokenHook, 'useRequireToken').mockReturnValue({ token: null, checking: false });
+
+        const spyArtists = jest.spyOn(spotifyApi, 'fetchUserTopArtists');
+        renderDashboardPage();
+
+        // Allow effects to run microtasks
+        expect(spyArtists).not.toHaveBeenCalled();
+    });
+
+    test('shows loading indicator while fetching artists', async () => {
+        // Create a promise we can resolve later
+        let resolveArtists;
+        const artistsPromise = new Promise((res) => { resolveArtists = res; });
+        jest.spyOn(spotifyApi, 'fetchUserTopArtists').mockImplementation(() => artistsPromise);
+
+        // Ensure top tracks call resolves quickly so it doesn't interfere
+        jest.spyOn(spotifyApi, 'fetchUserTopTracks').mockResolvedValue({ data: topTrackData, error: null });
+
+        renderDashboardPage();
+
+        // loading indicator should be visible while artists promise is pending
+        expect(screen.getByText(/Loading top artist/i)).toBeInTheDocument();
+
+        // now resolve artists and wait for render
+        resolveArtists({ data: topArtistData, error: null });
+        await screen.findByText(topArtistData.items[0].name);
     });
 });
