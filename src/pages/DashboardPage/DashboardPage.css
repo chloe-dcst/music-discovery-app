@@ -30,6 +30,7 @@
   display: flex;
   gap: 20px;
   justify-content: center;
+  align-items: stretch; /* ensure child cards share same height */
 }
 
 .dashboard-content .card {
@@ -42,9 +43,9 @@
 .card {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  width: 300px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+  width: 360px;
   text-align: center;
 }
 
@@ -82,6 +83,10 @@
   gap: 1rem;
   align-items: center;
   margin-top: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
 }
 
 .top-artist-img {
@@ -94,6 +99,7 @@
 .top-artist-name {
   margin: 0;
   font-size: 1.25rem;
+  color: #000;
 }
 
 .top-artist-genres {
@@ -105,4 +111,110 @@
 .dashboard-error {
   color: var(--danger, #c00);
   margin-top: 0.5rem;
+}
+
+/* Top track card */
+.top-track {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+.top-track-img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.top-track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.top-track-name {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #000;
+}
+
+.top-track-album {
+  margin: 0;
+  color: var(--muted, #666);
+  font-size: 0.95rem;
+}
+
+.top-track-artists {
+  margin: 0;
+  color: #000;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 520px) {
+  .dashboard-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .top-artist, .top-track {
+    flex-direction: row;
+    gap: 12px;
+  }
+}
+
+/* Override SimpleCard locally so we don't edit its file: make cards uniform in dashboard */
+.dashboard-content .simple-card {
+  width: 360px !important;
+  min-height: 260px !important;
+  padding: 20px !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12) !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important; /* push button to bottom */
+  align-items: center !important;
+}
+
+.dashboard-content .simple-card__image {
+  width: 96px !important;
+  height: 96px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  margin: 0 auto 12px auto !important;
+}
+
+.dashboard-content .simple-card__title {
+  font-size: 1.25rem !important;
+  color: #000 !important;
+  text-align: center !important;
+  display: -webkit-box !important;
+  line-clamp: 2 !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.25 !important;
+  min-height: calc(1.25em * 2) !important;
+}
+
+.dashboard-content .simple-card__subtitle {
+  font-size: 0.95rem !important;
+  color: var(--muted, #666) !important;
+  text-align: center !important;
+  display: -webkit-box !important;
+  line-clamp: 3 !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin-top: 6px !important;
+}
+
+.dashboard-content .simple-card__button {
+  margin-top: 12px !important;
 }
