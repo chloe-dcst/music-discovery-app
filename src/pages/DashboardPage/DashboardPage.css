@@ -75,3 +75,34 @@
   font-size: 1rem;
   margin: 5px 0;
 }
+
+/* Top artist card */
+.top-artist {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.top-artist-img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.top-artist-name {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.top-artist-genres {
+  margin: 0.25rem 0 0;
+  color: var(--muted, #666);
+  font-size: 0.95rem;
+}
+
+.dashboard-error {
+  color: var(--danger, #c00);
+  margin-top: 0.5rem;
+}
