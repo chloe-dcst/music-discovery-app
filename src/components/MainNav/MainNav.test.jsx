@@ -126,4 +126,23 @@ describe('MainNav', () => {
     expect(screen.getByText('Top Artists')).not.toHaveClass('active');
   });
 
+  test('renders Dashboard link and it becomes active on /dashboard', async () => {
+    renderWithRouter(['/dashboard']);
+
+    // wait for avatar_img to load as before
+    await waitFor(() => {
+      expect(screen.getByAltText(profileData.display_name)).toHaveClass('avatar__img');
+    });
+
+    const dashboardLink = screen.getByText('Dashboard');
+    expect(dashboardLink).toBeInTheDocument();
+    expect(dashboardLink).toHaveClass('active');
+    expect(dashboardLink).toHaveClass('nav-link');
+
+    // Ensure other links are not active
+    expect(screen.getByText('Top Tracks')).not.toHaveClass('active');
+    expect(screen.getByText('Top Artists')).not.toHaveClass('active');
+    expect(screen.getByText('Playlists')).not.toHaveClass('active');
+  });
+
 });
