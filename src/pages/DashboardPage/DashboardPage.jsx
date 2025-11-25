@@ -4,6 +4,7 @@ import './DashboardPage.css';
 import '../PageLayout.css';
 import { useRequireToken } from '../../hooks/useRequireToken.js';
 import { fetchUserTopArtists } from '../../api/spotify-me.js';
+import { fetchUserTopTracks } from '../../api/spotify-me.js';
 
 export default function DashboardPage() {
   const { token, checking } = useRequireToken();
@@ -41,6 +42,24 @@ export default function DashboardPage() {
     })();
 
     return () => { mounted = false; };
+  }, [token, checking]);
+
+  // Fetch user's top tracks and log the result for inspection (per step)
+  useEffect(() => {
+    if (checking) return;
+    if (!token) return;
+    (async () => {
+      try {
+        const res = await fetchUserTopTracks(token, 10);
+        console.log('fetchUserTopTracks result', res);
+        if (res?.data?.items && res.data.items.length > 0) {
+          console.log('topTracks.items[0]', res.data.items[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching top tracks:', err);
+      }
+    })();
+    // no cleanup needed: this effect only logs data
   }, [token, checking]);
 
   return (
